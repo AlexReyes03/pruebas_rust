@@ -1,22 +1,43 @@
 use axum::{
-    extract::State,
+    extract::{Path, State},
     Json,
-    http::StatusCode,
 };
-use crate::{
-    error::AppError,
-    models::wallet::*,
-    state::AppState,
-};
+use crate::error::AppError;
+use crate::modules::models::wallet::*;
+use crate::state::AppState;
 
 pub async fn generate_wallet(
-    State(state): State<AppState>,
-    Json(payload): Json<GenerateWalletRequest>,
+    State(_state): State<AppState>,
+    Json(_payload): Json<GenerateWalletRequest>,
 ) -> Result<Json<GenerateWalletResponse>, AppError> {
-    let response = state.wallet_service
-        .generate_wallet(payload)
-        .await
-        .map_err(|e| AppError::InternalError(e.to_string()))?;
+    Err(AppError::NotImplemented("generate_wallet endpoint".to_string()))
+}
 
-    Ok(Json(response))
+pub async fn fund_wallet(
+    State(_state): State<AppState>,
+    Json(_payload): Json<FundWalletRequest>,
+) -> Result<Json<FundWalletResponse>, AppError> {
+    Err(AppError::NotImplemented("fund_wallet endpoint".to_string()))
+}
+
+pub async fn get_balance(
+    State(_state): State<AppState>,
+    Path(_pubkey): Path<String>,
+) -> Result<Json<BalanceResponse>, AppError> {
+    Err(AppError::NotImplemented("get_balance endpoint".to_string()))
+}
+
+pub async fn send_transaction(
+    State(_state): State<AppState>,
+    Path(_pubkey): Path<String>,
+    Json(_payload): Json<SendTransactionRequest>,
+) -> Result<Json<SendTransactionResponse>, AppError> {
+    Err(AppError::NotImplemented("send_transaction endpoint".to_string()))
+}
+
+pub async fn aa_relay_transaction(
+    State(_state): State<AppState>,
+    Json(_payload): Json<RelayTransactionRequest>,
+) -> Result<Json<RelayTransactionResponse>, AppError> {
+    Err(AppError::NotImplemented("aa_relay_transaction endpoint".to_string()))
 }
