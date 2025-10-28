@@ -21,7 +21,6 @@ pub struct AppState {
     pub config: Arc<Config>,
     pub db_pool: SqlitePool,
     
-    // Services
     pub wallet_service: Arc<WalletService>,
     pub aa_service: Arc<AaService>,
     pub stellar_service: Arc<StellarService>,
@@ -34,12 +33,10 @@ impl AppState {
     pub async fn new(config: Config, db_pool: SqlitePool) -> Self {
         let config_arc = Arc::new(config.clone());
         
-        // Initialize repositories
         let wallet_repo = Arc::new(WalletRepository::new(db_pool.clone()));
         let transaction_repo = Arc::new(TransactionRepository::new(db_pool.clone()));
         let bank_transfer_repo = Arc::new(BankTransferRepository::new(db_pool.clone()));
 
-        // Initialize services
         let aa_service = Arc::new(AaService::new());
         let stellar_service = Arc::new(StellarService::new(
             config.stellar.horizon_url.clone(),
@@ -65,6 +62,7 @@ impl AppState {
 
         let bank_service = Arc::new(BankService::new(
             bank_transfer_repo.clone(),
+            wallet_repo.clone(),
             reputation_service.clone(),
         ));
 

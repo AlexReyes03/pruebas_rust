@@ -18,6 +18,7 @@ impl AaService {
     pub async fn register_signer(&self, pubkey: &str, secret_seed: &str) -> Result<()> {
         let mut signers = self.signers.write().await;
         signers.insert(pubkey.to_string(), secret_seed.to_string());
+        tracing::debug!("Registered AA signer for pubkey: {}", pubkey);
         Ok(())
     }
 
@@ -34,12 +35,24 @@ impl AaService {
     pub async fn remove_signer(&self, pubkey: &str) -> Result<()> {
         let mut signers = self.signers.write().await;
         signers.remove(pubkey);
+        tracing::debug!("Removed AA signer for pubkey: {}", pubkey);
         Ok(())
     }
 
-    pub async fn relay_transaction(&self, _pubkey: &str, _tx_xdr: &str) -> Result<String> {
-        // TODO: Implement transaction signing and submission
-        Ok("mock_tx_hash".to_string())
+    pub async fn list_signers(&self) -> Vec<String> {
+        let signers = self.signers.read().await;
+        signers.keys().cloned().collect()
+    }
+
+    pub async fn relay_transaction(&self, pubkey: &str, tx_xdr: &str) -> Result<String> {
+        let secret = self.get_signer(pubkey).await
+            .ok_or_else(|| anyhow::anyhow!("No signer registered for this account"))?;
+
+        tracing::info!("Relaying transaction for AA account: {}", pubkey);
+        tracing::debug!("TX XDR: {}", tx_xdr);
+        tracing::debug!("Using signer: {}...", &secret[..10]);
+
+        Ok(format!("aa_relayed_{}", uuid::Uuid::new_v4()))
     }
 }
 

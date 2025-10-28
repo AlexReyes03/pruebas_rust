@@ -3,6 +3,8 @@ mod error;
 mod routes;
 mod state;
 mod modules;
+mod utils;
+mod middleware;
 
 use anyhow::{Context, Result};
 use sqlx::sqlite::SqlitePoolOptions;
@@ -13,7 +15,6 @@ use crate::state::AppState;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Initialize tracing/logging
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
@@ -24,7 +25,6 @@ async fn main() -> Result<()> {
 
     tracing::info!("Starting Wallet Backend Server...");
 
-    // Load configuration
     let config = Config::load().context("Failed to load configuration")?;
     config.validate().context("Configuration validation failed")?;
     
@@ -32,7 +32,6 @@ async fn main() -> Result<()> {
     tracing::debug!("Server config: {}:{}", config.server.host, config.server.port);
     tracing::debug!("Stellar network: {}", config.stellar.network);
 
-    // Initialize database
     let db_pool = SqlitePoolOptions::new()
         .max_connections(5)
         .connect(&config.database.url)
@@ -41,7 +40,6 @@ async fn main() -> Result<()> {
 
     tracing::info!("Database connection established");
 
-    // Run migrations
     sqlx::migrate!("./migrations")
         .run(&db_pool)
         .await
@@ -49,15 +47,12 @@ async fn main() -> Result<()> {
 
     tracing::info!("Database migrations completed");
 
-    // Initialize application state
     let state = AppState::new(config.clone(), db_pool).await;
     
     tracing::info!("Application state initialized");
 
-    // Create router
     let app = routes::create_router(state);
 
-    // Start server
     let addr = format!("{}:{}", config.server.host, config.server.port);
     let listener = tokio::net::TcpListener::bind(&addr)
         .await

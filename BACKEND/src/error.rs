@@ -51,53 +51,39 @@ impl IntoResponse for AppError {
             AppError::WalletNotFound(_) => {
                 (StatusCode::NOT_FOUND, "WALLET_NOT_FOUND", self.to_string())
             }
-            AppError::InvalidPublicKey(_) => (
-                StatusCode::BAD_REQUEST,
-                "INVALID_PUBLIC_KEY",
-                self.to_string(),
-            ),
-            AppError::InsufficientBalance { .. } => (
-                StatusCode::BAD_REQUEST,
-                "INSUFFICIENT_BALANCE",
-                self.to_string(),
-            ),
-            AppError::ReputationTooLow { .. } => (
-                StatusCode::FORBIDDEN,
-                "REPUTATION_TOO_LOW",
-                self.to_string(),
-            ),
-            AppError::BadRequest(_) => (StatusCode::BAD_REQUEST, "BAD_REQUEST", self.to_string()),
+            AppError::InvalidPublicKey(_) => {
+                (StatusCode::BAD_REQUEST, "INVALID_PUBLIC_KEY", self.to_string())
+            }
+            AppError::InsufficientBalance { .. } => {
+                (StatusCode::BAD_REQUEST, "INSUFFICIENT_BALANCE", self.to_string())
+            }
+            AppError::ReputationTooLow { .. } => {
+                (StatusCode::FORBIDDEN, "REPUTATION_TOO_LOW", self.to_string())
+            }
+            AppError::BadRequest(_) => {
+                (StatusCode::BAD_REQUEST, "BAD_REQUEST", self.to_string())
+            }
             AppError::AccountAbstractionError(_) => {
                 (StatusCode::BAD_REQUEST, "AA_ERROR", self.to_string())
             }
             AppError::StellarNetworkError(_) => {
                 (StatusCode::BAD_GATEWAY, "STELLAR_ERROR", self.to_string())
             }
-            AppError::DatabaseError(_) => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "DATABASE_ERROR",
-                "Database operation failed".to_string(),
-            ),
-            AppError::ExternalApiError(_) => (
-                StatusCode::BAD_GATEWAY,
-                "EXTERNAL_API_ERROR",
-                self.to_string(),
-            ),
-            AppError::ConfigError(_) => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "CONFIG_ERROR",
-                "Configuration error".to_string(),
-            ),
-            AppError::InternalError(_) => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "INTERNAL_ERROR",
-                "Internal server error".to_string(),
-            ),
-            AppError::NotImplemented(_) => (
-                StatusCode::NOT_IMPLEMENTED,
-                "NOT_IMPLEMENTED",
-                self.to_string(),
-            ),
+            AppError::DatabaseError(_) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "DATABASE_ERROR", "Database operation failed".to_string())
+            }
+            AppError::ExternalApiError(_) => {
+                (StatusCode::BAD_GATEWAY, "EXTERNAL_API_ERROR", self.to_string())
+            }
+            AppError::ConfigError(_) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "CONFIG_ERROR", "Configuration error".to_string())
+            }
+            AppError::InternalError(_) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "Internal server error".to_string())
+            }
+            AppError::NotImplemented(_) => {
+                (StatusCode::NOT_IMPLEMENTED, "NOT_IMPLEMENTED", self.to_string())
+            }
         };
 
         let body = Json(json!({

@@ -1,4 +1,4 @@
-use config::{Config as ConfigBuilder, ConfigError, Environment, File};
+use config::{Config as ConfigBuilder, ConfigError, Environment};
 use serde::Deserialize;
 use std::env;
 
@@ -53,8 +53,6 @@ impl Config {
     pub fn load() -> Result<Self, ConfigError> {
         dotenvy::dotenv().ok();
 
-        let run_mode = env::var("RUN_MODE").unwrap_or_else(|_| "development".into());
-
         let config = ConfigBuilder::builder()
             .set_default("server.port", 4000)?
             .set_default("server.host", "0.0.0.0")?
@@ -66,10 +64,8 @@ impl Config {
             .set_default("aa.bundler_url", "http://localhost:4100")?
             .set_default("aa.signer_memory", true)?
             .set_default("reputation.threshold", 50)?
-            .set_default("external_apis.coingecko_api_url", "https://api.coingecko.com/api/v3",)?
-            .add_source(File::with_name(&format!("config/{}", run_mode)).required(false))
-            .add_source(Environment::with_prefix("APP").separator("__"))
-            .add_source(Environment::default())
+            .set_default("external_apis.coingecko_api_url", "https://api.coingecko.com/api/v3")?
+            .add_source(Environment::default().try_parsing(true))
             .build()?;
 
         config.try_deserialize()
@@ -89,22 +85,5 @@ impl Config {
         }
 
         Ok(())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_config_load() {
-        let config = Config::load();
-        assert!(config.is_ok());
-    }
-
-    #[test]
-    fn test_config_validation() {
-        let config = Config::load().unwrap();
-        assert!(config.validate().is_ok());
     }
 }

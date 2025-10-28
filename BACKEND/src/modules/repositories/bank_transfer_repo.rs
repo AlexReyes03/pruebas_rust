@@ -67,4 +67,21 @@ impl BankTransferRepository {
         .await?;
         Ok(transfers)
     }
+
+    pub async fn find_by_public_key(&self, public_key: &str) -> Result<Vec<BankTransfer>> {
+        let transfers = sqlx::query_as!(
+            BankTransfer,
+            r#"
+            SELECT id, wallet_id, public_key, amount_fiat, currency, bank_account_masked, 
+                   status, rejection_reason, reputation_score, created_at, completed_at
+            FROM bank_transfers 
+            WHERE public_key = ?
+            ORDER BY created_at DESC
+            "#,
+            public_key
+        )
+        .fetch_all(&self.pool)
+        .await?;
+        Ok(transfers)
+    }
 }

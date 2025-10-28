@@ -50,4 +50,16 @@ impl WalletRepository {
         .await?;
         Ok(wallet)
     }
+
+    pub async fn update_timestamp(&self, id: &str) -> Result<()> {
+        let now = chrono::Utc::now();
+        sqlx::query!(
+            "UPDATE wallets SET updated_at = ? WHERE id = ?",
+            now,
+            id
+        )
+        .execute(&self.pool)
+        .await?;
+        Ok(())
+    }
 }

@@ -50,9 +50,38 @@ impl TransactionRepository {
         Ok(transactions)
     }
 
+    pub async fn find_by_public_key(&self, public_key: &str, limit: i64) -> Result<Vec<Transaction>> {
+        let transactions = sqlx::query_as!(
+            Transaction,
+            r#"
+            SELECT t.id, t.wallet_id, t.tx_hash, t.tx_type, t.from_address, t.to_address, t.amount, t.asset, t.status, t.created_at
+            FROM transactions t
+            INNER JOIN wallets w ON t.wallet_id = w.id
+            WHERE w.public_key = ?
+            ORDER BY t.created_at DESC
+            LIMIT ?
+            "#,
+            public_key,
+            limit
+        )
+        .fetch_all(&self.pool)
+        .await?;
+        Ok(transactions)
+    }
+
     pub async fn count_by_wallet_id(&self, wallet_id: &str) -> Result<i64> {
         let result = sqlx::query_scalar!(
             "SELECT COUNT(*) as count FROM transactions WHERE wallet_id = ?",
+            wallet_id
+        )
+        .fetch_one(&self.pool)
+        .await?;
+        Ok(result)
+    }
+
+    pub async fn sum_volume_by_wallet_id(&self, wallet_id: &str) -> Result<f64> {
+        let result = sqlx::query_scalar!(
+            "SELECT COALESCE(SUM(CAST(amount AS REAL)), 0.0) as total FROM transactions WHERE wallet_id = ? AND status = 'completed'",
             wallet_id
         )
         .fetch_one(&self.pool)
